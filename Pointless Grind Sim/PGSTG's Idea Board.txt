@@ -1,0 +1,6 @@
+If file= created, it means that this is the first time a save is made\
+
+This means beginning must be played.
+
+If a save is present, progress must be transferred from save/Non-volatile to RAM, meaning they must have objects dedicated to lvl, str, age, vil etc.
+
