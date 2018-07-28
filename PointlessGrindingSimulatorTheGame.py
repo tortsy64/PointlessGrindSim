@@ -34,6 +34,7 @@ Welcome to...
 def save_manager_on_load() :#Defines a function called save_manager_on_load
 
     global new_game #Makes new_game usable outside of function
+    global name #Makes name usable outside of function
 
     try: #If save doesn't exist, make it in the 'try', if it already exists, then load it in the 'except'
         open_save_file=open("save.txt","x") #Create 'open_save_file which opens save.txt and will only work if save.txt doesn't exist. If save.txt does exist, it will Error and go to the except
@@ -58,6 +59,11 @@ def save_manager_on_load() :#Defines a function called save_manager_on_load
 #END OF save_manager_on_load()
 
 def pull_stats_from_save():
+
+    global name #Makes name usable outside of function
+    global p_atk #Makes p_atk usable outside of function
+    global p_def #Makes p_def usable outside of function
+    global p_hp #Makes p_hp usable outside of function
     
     open_save_file=open("save.txt","r+")#Opens save file in read+write mode
     stats_assignment_holder=(open_save_file.read()) #Holds all stats in a string
@@ -72,7 +78,7 @@ def pull_stats_from_save():
 
 def save_the_game():#Defines the function save_the_game, this can be input into a dictionary so saving can happen on demand.
     open_save_file=open("save.txt","w")#Opens save file in read+write mode
-    open_save_file.write(str(name)+":"+int(p_atk)+":"+int(p_def)+":"+int(p_hp))
+    open_save_file.write(str(name)+":"+str(p_atk)+":"+str(p_def)+":"+str(p_hp))
     open_save_file.close()
     print("Game has been saved")
     
