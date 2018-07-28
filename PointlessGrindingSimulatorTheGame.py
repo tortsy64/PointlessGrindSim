@@ -72,7 +72,10 @@ def pull_stats_from_save():
 
 def save_the_game():#Defines the function save_the_game, this can be input into a dictionary so saving can happen on demand.
     open_save_file=open("save.txt","w")#Opens save file in read+write mode
-    open_save_file.write(str(name)+int(p_atk)+int(p_def)+int(p_hp))
+    open_save_file.write(str(name)+":"+int(p_atk)+":"+int(p_def)+":"+int(p_hp))
+    open_save_file.close()
+    print("Game has been saved")
+    
 
 
 
@@ -102,6 +105,10 @@ if new_game == True: #This is true when a save file didn't exist at startup, so 
 elif new_game == False: #This is true when a save file does exist at startup, so game is started and save is loaded.
     game()
 
+else:
+    print("Error has occured: new_game is not True or False")
+
+save_the_game()
 
 
 
