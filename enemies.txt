@@ -1,0 +1,1 @@
+Kobold;Boar;Eagle;Skeleton;Goblin;Dragon;Hydra;Ent;Bird;Zombie
