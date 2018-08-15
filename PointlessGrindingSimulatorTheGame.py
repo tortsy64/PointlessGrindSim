@@ -112,9 +112,10 @@ Finish Game Session (Type [5])
             fight_difficulty=change_difficulty(fight_difficulty)#Runs the change_difficulty() function, sending fight_difficulty into it to show current difficulty
 
         elif mode_selection.lower()==("4"): #When input is "4", do the following
-             print("""\n\n\n\n\nPlayer Stats
+
+            print("""\n\n\n\n\nPlayer Stats
 Name: """+str(p_name)+"""
-HP: """+str(p_hp)+"/"+str(p_maxhp)+"""
+HP: """+str(p_hp)+"/"+str(p_hp)+"""
 Attack: """+str(p_atk)+"""
 Defence: """+str(p_def))#Print player stats
 
@@ -229,7 +230,7 @@ def change_difficulty(fight_difficulty):
 
 def create_an_enemy(fight_difficulty):
     
-    open_enemy_file=open("enemies.txt","r")#Opens enemy file in read mode
+    open_enemy_file=open("StoredFiles/enemies.txt","r")#Opens enemy file in read mode
     enemy_list=open_enemy_file.read()#Holds all enemies in a string
     enemy_list=enemy_list.split(";")#Make an array where each element is made by splitting the string by ";" eg a;b -> [a,b]
     enemy_total=len(enemy_list)
