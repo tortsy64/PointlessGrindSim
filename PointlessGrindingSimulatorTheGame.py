@@ -256,7 +256,7 @@ def stat_roulette(stat,stat_type,fight_difficulty):
     if stat_bonus>0:
         print (stat_type+" has increased: "+str(stat)+" --> "+str(stat+stat_bonus ))
     elif stat_bonus==0:
-        print(stat_type+" is still "+str(p_hp))
+        print(stat_type+" is still "+str(stat))
     else:
         print("Error STATROULETTE: If you see this, please tell me the error code and anything you did to cause this")
         stat_bonus=0
