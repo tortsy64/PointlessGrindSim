@@ -33,11 +33,8 @@ Welcome to...
 
 def save_manager_on_load() :#Defines a function called save_manager_on_load
 
-    global new_game #Makes new_game usable outside of function
-    global p_name #Makes p_name usable outside of function
-
     try: #If save doesn't exist, make it in the 'try', if it already exists, then load it in the 'except'
-        open_save_file=open("save.txt","x") #Create 'open_save_file which opens save.txt and will only work if save.txt doesn't exist. If save.txt does exist, it will Error and go to the except
+        open_save_file=open("StoredFiles/save.txt","x") #Create 'open_save_file which opens save.txt and will only work if save.txt doesn't exist. If save.txt does exist, it will Error and go to the except
 
         p_name=input("Whats your name?")#Asks user for name
 
@@ -56,11 +53,15 @@ def save_manager_on_load() :#Defines a function called save_manager_on_load
         new_game=False #This means a continue game function should be made and ran or whatever when this is False
 
 
+    return new_game
+
+    
+
 #END OF save_manager_on_load()
 
 def pull_stats_from_save():
     
-    open_save_file=open("save.txt","r")#Opens save file in read+write mode
+    open_save_file=open("StoredFiles/save.txt","r")#Opens save file in read+write mode
     stats_assignment_holder=open_save_file.read() #Holds all stats in a string
     stats_assignment_holder=stats_assignment_holder.split(":")#Splits each stat (name, atk etc.) into an array
     p_name=stats_assignment_holder[0]#Name is pulled from save file
@@ -73,8 +74,8 @@ def pull_stats_from_save():
 
 #END OF pull_stats_from_save()
 
-def save_the_game():#Defines the function save_the_game, this can be input into a dictionary so saving can happen on demand.
-    open_save_file=open("save.txt","w")#Opens save file in read+write mode
+def save_the_game(p_name, p_atk, p_def, p_hp):#Defines the function save_the_game, this can be input into a dictionary so saving can happen on demand.
+    open_save_file=open("StoredFiles/save.txt","w")#Opens save file in read+write mode
     open_save_file.write(str(p_name)+":"+str(p_atk)+":"+str(p_def)+":"+str(p_hp))#Writes the current stats to the save file.
     open_save_file.close()#Closes save file to save RAM as this is typically the last use during code execution
     print("Game has been saved")#Gives confirmation that saving has happened. 
@@ -84,29 +85,40 @@ def save_the_game():#Defines the function save_the_game, this can be input into 
 
 
 def hub(p_name, p_hp, p_atk, p_def ): #Defines the function hub, this is where the game hub is.
-
-    global fight_difficulty
-
+    
     keep_playing=True
     
     fight_difficulty=int(1)#Sets default difficulty, in case difficulty isn't changed by user.
     
     while keep_playing==True:#As long as this condition is satisfied, the game will keep looping about until the user wants to finish the session
     
-        mode_selection=input("Would you like to...\n[Fight] An Enemy\n[Save] Your Game\nChange the Enemy [Difficulty]\n[Finish] Game Session\n") #Input to decide game mode, and directs to a function.
+        mode_selection=input("""Would you like to...\n
+Fight An Enemy (Type [1])
+Save the Game (Type [2]) (The game autosaves, this option is for the paranoid.)
+Change the Enemy Difficulty (Type [3])
+Check Your Stats (Type [4])
+Finish Game Session (Type [5])
+""") #Input to decide game mode, and directs to a function.
 
-        if mode_selection.lower()==("fight"): #When input is made all lowercase, if it is "fight", do the following
+        if mode_selection.lower()==("1"): #When input is "1", do the following
 
-            e_name, e_atk, e_def, e_hp=create_an_enemy(fight_difficulty)
-            p_hp, p_atk, p_def=initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_atk, e_def, e_hp)
+            e_name, e_atk, e_def, e_hp=create_an_enemy(fight_difficulty)#Creates an enemy, and the function returns the enemy's stats.
+            p_hp, p_atk, p_def=initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_atk, e_def, e_hp)#Inputs enemy and player stats, with difficulty for battle scenatio and returns any increases to player stats.
+            save_the_game(p_name, p_atk, p_def, p_hp)#Runs the save_the_game() function. It functions as autosave
+        elif mode_selection.lower()==("2"): #When input is "2", do the following
+            save_the_game(p_name, p_atk, p_def, p_hp)#Runs the save_the_game() function
 
-        elif mode_selection.lower()==("save"): #When input is made all lowercase, if it is "save", do the following
-            save_the_game()#Runs the save_the_game() function
-
-        elif mode_selection.lower()==("difficulty"): #When input is made all lowercase, if it is "difficulty", do the following
+        elif mode_selection.lower()==("3"): #When input is "3", do the following
             fight_difficulty=change_difficulty(fight_difficulty)#Runs the change_difficulty() function, sending fight_difficulty into it to show current difficulty
 
-        elif mode_selection.lower()==("finish"): #When input is made all lowercase, if it is "finish", do the following
+        elif mode_selection.lower()==("4"): #When input is "4", do the following
+             print("""\n\n\n\n\nPlayer Stats
+Name: """+str(p_name)+"""
+HP: """+str(p_hp)+"/"+str(p_maxhp)+"""
+Attack: """+str(p_atk)+"""
+Defence: """+str(p_def))#Print player stats
+
+        elif mode_selection.lower()==("5"): #When input is "5", do the following
             keep_playing=False #Ends the loop, allowing the game to quit
             
         else:
@@ -115,20 +127,24 @@ def hub(p_name, p_hp, p_atk, p_def ): #Defines the function hub, this is where t
 #END OF hub()
 
 
-def initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_atk, e_def, e_hp):#Defines function
-    print("\n\n\n\n\nEnemy Stats\nName: "+str(e_name)+" / Difficulty: "+str(fight_difficulty)+"\nHP: "+str(e_hp)+"\nAttack: "+str(e_atk)+"\nDefence: "+str(e_def))
-    import random
+def initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_atk, e_def, e_hp):#Defines function, and takes in player stats, enemy stats and difficulty
 
-    p_maxhp=p_hp
-    e_maxhp=e_hp
+    p_maxhp=p_hp #Sets the MaxHP of player to HP stat
+    e_maxhp=e_hp #Sets the MaxHP of enemy to HP stat
 
     battle_finished=False
     while battle_finished==False:
-        print("\n\n\n\n\nEnemy Stats\nName: "+str(e_name)+" / Difficulty: "+str(fight_difficulty)+"\nHP: "+str(e_hp)+"/"+str(e_maxhp)+"\nAttack: "+str(e_atk)+"\nDefence: "+str(e_def))
-        
-        print("\n\n\n\n\nPlayer Stats\nName: "+str(p_name)+"\nHP: "+str(p_hp)+"/"+str(p_maxhp)+"\nAttack: "+str(p_atk)+"\nDefence: "+str(p_def))
+        print("""\n\n\n\n\nEnemy Stats
+Name: """+str(e_name)+" / Difficulty: "+str(fight_difficulty)+"""
+HP: """+str(e_hp)+"/"+str(e_maxhp)+"""
+Attack: """+str(e_atk)+"""
+Defence: """+str(e_def))#Print player stats
 
-
+        print("""\n\n\n\n\nPlayer Stats
+Name: """+str(p_name)+"""
+HP: """+str(p_hp)+"/"+str(p_maxhp)+"""
+Attack: """+str(p_atk)+"""
+Defence: """+str(p_def))#Print player stats
 
         fight_command=input("""Would you like to...
     Attack? (Type [1])
@@ -165,21 +181,27 @@ def initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_
 
     if battle_finished==True:
         p_hp=p_maxhp #Resets HP to max
- 
-        p_hp=stat_roulette(p_hp,fight_difficulty)
-        p_atk=stat_roulette(p_atk,fight_difficulty)
-        p_def=stat_roulette(p_def,fight_difficulty)
 
-        print("HP is currently "+str(p_hp))
-        print("Attack is currently "+str(p_atk))
-        print("Defense is currently "+str(p_def))
+        stat_type_hp=("HP")
+        stat_type_atk=("ATK")
+        stat_type_def=("DEF")
+        
+        p_hp=stat_roulette(p_hp,stat_type_hp,fight_difficulty)
+        p_atk=stat_roulette(p_atk,stat_type_atk,fight_difficulty)
+        p_def=stat_roulette(p_def,stat_type_def,fight_difficulty)
+
+
 
     elif battle_finished==("Escaped"):
         print("You successfully escaped!")
         p_hp=p_maxhp #Resets HP to max
 
-    elif battle_finished==("Failed"):
+    elif battle_finished==("Failed") and battle_finished==True:
         print("You died!")
+        p_hp=p_maxhp #Resets HP to max
+
+    else:
+        print("ERROR BATTLEFINISH: If you see this, please tell me the error code and anything you did to cause this")
         p_hp=p_maxhp #Resets HP to max
 
     return p_hp, p_atk, p_def
@@ -222,12 +244,22 @@ def create_an_enemy(fight_difficulty):
 
 #END OF create_an_enemy()
 
-def stat_roulette(stat,fight_difficulty):
+def stat_roulette(stat,stat_type,fight_difficulty):
     fight_difficulty=fight_difficulty*random.randint(1,50)
     stat_bonus=fight_difficulty//100
     stats_roulette_result=random.randint(0,99)
+
     if fight_difficulty%100>stats_roulette_result:
         stat_bonus+=1
+
+    if stat_bonus>0:
+        print (stat_type+" has increased: "+str(stat)+" --> "+str(stat+stat_bonus ))
+    elif stat_bonus==0:
+        print(stat_type+" is still "+str(p_hp))
+    else:
+        print("Error STATROULETTE: If you see this, please tell me the error code and anything you did to cause this")
+        stat_bonus=0
+    
     stat=stat+stat_bonus 
     return stat
 
@@ -265,13 +297,14 @@ import random
 
 title_screen()#Shows the title screen
 
-save_manager_on_load()#Runs save_manager_on_load
+new_game=save_manager_on_load()#Runs save_manager_on_load
 
 p_name, p_hp, p_atk, p_def =pull_stats_from_save()#Runs pull_stats_from_save
 
 p_hp=int(p_hp)
 p_atk=int(p_atk)
 p_def=int(p_def)
+
 
 
 if new_game == True: #This is true when a save file didn't exist at startup, so a new game is started and we make a tutorial or beginning
