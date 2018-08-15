@@ -20,7 +20,7 @@ Welcome to...
 |    | 
 |    |__________   _  
 |    		| |_| 
-\____________   |  _.  _________ 
+\____________   |  _   _________ 
  ____        |	| | | /  _   _  \ 
 |    |_______|	| | | | | | | | | 
 |		| | | | | | | | | 
@@ -59,11 +59,6 @@ def save_manager_on_load() :#Defines a function called save_manager_on_load
 #END OF save_manager_on_load()
 
 def pull_stats_from_save():
-
-    global p_name #Makes p_name usable outside of function
-    global p_atk #Makes p_atk usable outside of function
-    global p_def #Makes p_def usable outside of function
-    global p_hp #Makes p_hp usable outside of function
     
     open_save_file=open("save.txt","r")#Opens save file in read+write mode
     stats_assignment_holder=open_save_file.read() #Holds all stats in a string
@@ -73,6 +68,8 @@ def pull_stats_from_save():
     p_def=stats_assignment_holder[2]#Defense is pulled from save file
     p_hp=stats_assignment_holder[3]#HP is pulled from save file
     open_save_file.close()#Closes file for later use and to save RAM
+
+    return p_name, p_hp, p_atk, p_def 
 
 #END OF pull_stats_from_save()
 
@@ -86,7 +83,7 @@ def save_the_game():#Defines the function save_the_game, this can be input into 
 
 
 
-def hub(): #Defines the function hub, this is where the game hub is.
+def hub(p_name, p_hp, p_atk, p_def ): #Defines the function hub, this is where the game hub is.
 
     global fight_difficulty
 
@@ -101,13 +98,13 @@ def hub(): #Defines the function hub, this is where the game hub is.
         if mode_selection.lower()==("fight"): #When input is made all lowercase, if it is "fight", do the following
 
             e_name, e_atk, e_def, e_hp=create_an_enemy(fight_difficulty)
-            initiate_fight_mode(fight_difficulty, e_name, e_atk, e_def, e_hp)
+            p_hp, p_atk, p_def=initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_atk, e_def, e_hp)
 
         elif mode_selection.lower()==("save"): #When input is made all lowercase, if it is "save", do the following
             save_the_game()#Runs the save_the_game() function
 
         elif mode_selection.lower()==("difficulty"): #When input is made all lowercase, if it is "difficulty", do the following
-            fight_difficulty=change_difficulty(fight_difficulty)#Runs the save_the_game() function
+            fight_difficulty=change_difficulty(fight_difficulty)#Runs the change_difficulty() function, sending fight_difficulty into it to show current difficulty
 
         elif mode_selection.lower()==("finish"): #When input is made all lowercase, if it is "finish", do the following
             keep_playing=False #Ends the loop, allowing the game to quit
@@ -118,9 +115,76 @@ def hub(): #Defines the function hub, this is where the game hub is.
 #END OF hub()
 
 
-def initiate_fight_mode(fight_difficulty, e_name, e_atk, e_def, e_hp):#Defines function
+def initiate_fight_mode(fight_difficulty, p_name, p_hp, p_atk, p_def, e_name, e_atk, e_def, e_hp):#Defines function
     print("\n\n\n\n\nEnemy Stats\nName: "+str(e_name)+" / Difficulty: "+str(fight_difficulty)+"\nHP: "+str(e_hp)+"\nAttack: "+str(e_atk)+"\nDefence: "+str(e_def))
+    import random
 
+    p_maxhp=p_hp
+    e_maxhp=e_hp
+
+    battle_finished=False
+    while battle_finished==False:
+        print("\n\n\n\n\nEnemy Stats\nName: "+str(e_name)+" / Difficulty: "+str(fight_difficulty)+"\nHP: "+str(e_hp)+"/"+str(e_maxhp)+"\nAttack: "+str(e_atk)+"\nDefence: "+str(e_def))
+        
+        print("\n\n\n\n\nPlayer Stats\nName: "+str(p_name)+"\nHP: "+str(p_hp)+"/"+str(p_maxhp)+"\nAttack: "+str(p_atk)+"\nDefence: "+str(p_def))
+
+
+
+        fight_command=input("""Would you like to...
+    Attack? (Type [1])
+    Escape? (Type [2])
+    """)  #User input to decide action in battle
+        if fight_command==("1"):
+      
+            player_damage_dealt =p_atk - e_def #Determines damage dealt by the player
+            if player_damage_dealt < 0: #If it is negative damage...
+                player_damage_dealt=0 #...Set to 0, to prevent negative damage
+
+            enemy_damage_dealt =e_atk - p_def #Determines damage dealt by the enemy
+            if enemy_damage_dealt < 0:#If it is negative damage...
+                enemy_damage_dealt=0 #...Set to 0, to prevent negative damage
+
+            p_hp=p_hp-enemy_damage_dealt
+            
+            e_hp=e_hp-player_damage_dealt
+
+            if p_hp<=0:
+                battle_finished=("Failed")
+
+            if e_hp<=0:
+                battle_finished=True
+            
+             
+        elif fight_command==("2"):
+            battle_finished=("Escaped")
+
+        else:
+            print("Invalid Command. Please type a number associated to a command above, without brackets")
+
+
+
+    if battle_finished==True:
+        p_hp=p_maxhp #Resets HP to max
+ 
+        p_hp=stat_roulette(p_hp,fight_difficulty)
+        p_atk=stat_roulette(p_atk,fight_difficulty)
+        p_def=stat_roulette(p_def,fight_difficulty)
+
+        print("HP is currently "+str(p_hp))
+        print("Attack is currently "+str(p_atk))
+        print("Defense is currently "+str(p_def))
+
+    elif battle_finished==("Escaped"):
+        print("You successfully escaped!")
+        p_hp=p_maxhp #Resets HP to max
+
+    elif battle_finished==("Failed"):
+        print("You died!")
+        p_hp=p_maxhp #Resets HP to max
+
+    return p_hp, p_atk, p_def
+
+        
 #END OF initiate_fight_mode()
 
 
@@ -130,21 +194,18 @@ def change_difficulty(fight_difficulty):
     while difficulty_set_successfully==False:
         try:
             difficulty_input=int(input("Enemy difficulty is currently set to "+str(fight_difficulty)+"\nWhat would you like to set it to?\n"))
-            difficulty_set_successfully=True
-            print("Difficulty change is successful. Enemy difficulty is now "+str(difficulty_input))
-            return difficulty_input
+            if (difficulty_input!=0) and (str(difficulty_input).strip("-")==str(difficulty_input)) and (int(difficulty_input)==difficulty_input): #Checks if its not 0, isnt negativr and isnt decimal respectively
+                print("Difficulty change is successful. Enemy difficulty is now "+str(difficulty_input))
+                difficulty_set_successfully=True
+                return difficulty_input
+            else:
+                print("Error, difficulty is negative or zero. Please input a positive, whole number")
         except:
-            ("Difficulty change is unsuccessful. Please input a valid whole number")
+            ("Difficulty change is unsuccessful. Please input a positive, whole, non-zero number")
 
 #END OF change_difficulty()
 
 def create_an_enemy(fight_difficulty):
-    global enemy_name
-    global e_atk
-    global e_def
-    global e_hp
-
-    import random
     
     open_enemy_file=open("enemies.txt","r")#Opens enemy file in read mode
     enemy_list=open_enemy_file.read()#Holds all enemies in a string
@@ -161,10 +222,34 @@ def create_an_enemy(fight_difficulty):
 
 #END OF create_an_enemy()
 
+def stat_roulette(stat,fight_difficulty):
+    fight_difficulty=fight_difficulty*random.randint(1,50)
+    stat_bonus=fight_difficulty//100
+    stats_roulette_result=random.randint(0,99)
+    if fight_difficulty%100>stats_roulette_result:
+        stat_bonus+=1
+    stat=stat+stat_bonus 
+    return stat
+
+#END OF stat_roulette()
+
+
+
 
 
 def tutorial():
-    print("Tutorial is a WIP")#Indicates a new game is made, requiring a tutorial [TODO]
+    print("""_____Tutorial is a WIP____________
+The harder the enemy, the more likely you are to gain stats after battle,
+but its random whether you do so keep grinding until you get stronger.
+You can fight, you can save but please don't hurt each other.
+
+And if you already have an old save file and are seeing this,
+copy your old save.txt from the old game folder!
+
+Have fun playing this WIP mess!
+
+
+""")#Indicates a new game is made, requiring a tutorial [TODO]
 
 
 #END OF tutorial()
@@ -175,19 +260,25 @@ def tutorial():
 
 #_________________BEGINNING OF "CODE"____________________________________________________________________________________________________________________
 
+import random
+    
+
 title_screen()#Shows the title screen
 
 save_manager_on_load()#Runs save_manager_on_load
 
-pull_stats_from_save()#Runs pull_stats_from_save
+p_name, p_hp, p_atk, p_def =pull_stats_from_save()#Runs pull_stats_from_save
 
+p_hp=int(p_hp)
+p_atk=int(p_atk)
+p_def=int(p_def)
 
 
 if new_game == True: #This is true when a save file didn't exist at startup, so a new game is started and we make a tutorial or beginning
     tutorial()
-    hub()
+    hub(p_name, p_hp, p_atk, p_def )
 elif new_game == False: #This is true when a save file does exist at startup, so game is started and save is loaded.
-    hub()
+    hub(p_name, p_hp, p_atk, p_def )
 
 else:
     print("Error has occured: new_game is not True or False")#new_game's value is clearly not a Boolean, so this is an error saying its gone wrong
