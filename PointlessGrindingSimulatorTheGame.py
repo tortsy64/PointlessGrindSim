@@ -34,9 +34,10 @@ Welcome to...
 def save_manager_on_load() :#Defines a function called save_manager_on_load
 
     try: #If save doesn't exist, make it in the 'try', if it already exists, then load it in the 'except'
-        open_save_file=open("StoredFiles/save.txt","x") #Create 'open_save_file which opens save.txt and will only work if save.txt doesn't exist. If save.txt does exist, it will Error and go to the except
 
         p_name=input("Whats your name?")#Asks user for name
+
+        open_save_file=open("StoredFiles/save.txt","x") #Create 'open_save_file which opens save.txt and will only work if save.txt doesn't exist. If save.txt does exist, it will Error and go to the except
 
         open_save_file.write(str(p_name)+":1:1:10")#Thus writes the name, attack, defense and hp of the new character to the newly made save file
 
@@ -269,7 +270,7 @@ def stat_roulette(p_name,e_name,p_stat,e_stat,stat_type,fight_difficulty):
     if fight_difficulty%100>stats_roulette_result:
         stat_bonus+=1
 
-    stat_absorption=(e_stat*0.0042)
+    stat_absorption=round((e_stat*0.0042),4)
 
     print(str(stat_absorption)+" "+stat_type+" has been absorbed from the "+e_name)
 
@@ -282,9 +283,11 @@ def stat_roulette(p_name,e_name,p_stat,e_stat,stat_type,fight_difficulty):
         print("Error STATROULETTE: If you see this, please tell me the error code and anything you did to cause this")
         stat_bonus=0
 
-    print(stat_type+": "+str(p_stat)+" --> "+str(p_stat + stat_bonus + stat_absorption))
+    p_stat=round(p_stat + stat_bonus + stat_absorption,4)
+
+    print(stat_type+": "+str(p_stat)+" --> "+str(p_stat))
+
     
-    p_stat=p_stat + stat_bonus + stat_absorption
     return p_stat
 
 #END OF stat_roulette()
