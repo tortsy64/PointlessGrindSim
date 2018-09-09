@@ -70,7 +70,7 @@ def pull_stats_from_save():
     p_hp=stats_assignment_holder[3]#HP is pulled from save file
     open_save_file.close()#Closes file for later use and to save RAM
 
-    return p_name, p_hp, p_atk, p_def 
+    return p_name, p_hp, p_atk, p_def #Returns the player stats to the rest of the program.
 
 #END OF pull_stats_from_save()
 
@@ -98,6 +98,7 @@ Save the Game (Type [2]) (The game autosaves, this option is for the paranoid.)
 Change the Enemy Difficulty (Type [3])
 Check Your Stats (Type [4])
 Finish Game Session (Type [5])
+Delete Your Save and End Session (Type [ResetMyGame12345])
 """) #Input to decide game mode, and directs to a function.
 
         if mode_selection.lower()==("1"): #When input is "1", do the following
@@ -120,6 +121,14 @@ Attack: """+str(p_atk)+"""
 Defence: """+str(p_def))#Print player stats
 
         elif mode_selection.lower()==("5"): #When input is "5", do the following
+            keep_playing=False #Ends the loop, allowing the game to quit
+
+        elif mode_selection.lower()==("resetmygame12345"): #When input is "ResetMyGame12345", do the following
+            import os
+            os.remove("StoredFiles/save.txt")
+            print("File Removed!")
+
+            
             keep_playing=False #Ends the loop, allowing the game to quit
             
         else:
@@ -161,15 +170,22 @@ Defence: """+str(p_def))#Print player stats
             if enemy_damage_dealt < 0:#If it is negative damage...
                 enemy_damage_dealt=0 #...Set to 0, to prevent negative damage
 
-            p_hp=p_hp-enemy_damage_dealt
+            p_hp=p_hp-enemy_damage_dealt #Subtracts HP by damage dealt
             
-            e_hp=e_hp-player_damage_dealt
+            e_hp=e_hp-player_damage_dealt #Subtracts HP by damage dealt
 
-            if p_hp<=0:
+            if p_hp<=0: #Battle is failed if player's HP is equal to or less than 0
                 battle_finished=("Failed")
 
-            if e_hp<=0:
+            if e_hp<=0: #Battle is won if enemy's HP is equal to or less than 0
                 battle_finished=True
+
+
+            print(p_name+" dealt "+str(player_damage_dealt)+" to "+e_name) #Outputs damage being dealt to enemy
+
+            if battle_finished==False: #If battle is not lost or has been escaped from, perform enemy attack.
+                print(e_name+" dealt "+str(player_damage_dealt)+" to "+p_name) #Outputs damage being dealt to player
+                
             
              
         elif fight_command==("2"):
@@ -187,9 +203,9 @@ Defence: """+str(p_def))#Print player stats
         stat_type_atk=("ATK")
         stat_type_def=("DEF")
         
-        p_hp=stat_roulette(p_hp,stat_type_hp,fight_difficulty)
-        p_atk=stat_roulette(p_atk,stat_type_atk,fight_difficulty)
-        p_def=stat_roulette(p_def,stat_type_def,fight_difficulty)
+        p_hp=stat_roulette(p_name,e_name,p_hp,e_maxhp,stat_type_hp,fight_difficulty)
+        p_atk=stat_roulette(p_name,e_name,p_atk,e_atk,stat_type_atk,fight_difficulty)
+        p_def=stat_roulette(p_name,e_name,p_def,e_def,stat_type_def,fight_difficulty)
 
 
 
@@ -197,7 +213,7 @@ Defence: """+str(p_def))#Print player stats
         print("You successfully escaped!")
         p_hp=p_maxhp #Resets HP to max
 
-    elif battle_finished==("Failed") and battle_finished==True:
+    elif battle_finished==("Failed"):
         print("You died!")
         p_hp=p_maxhp #Resets HP to max
 
@@ -245,7 +261,7 @@ def create_an_enemy(fight_difficulty):
 
 #END OF create_an_enemy()
 
-def stat_roulette(stat,stat_type,fight_difficulty):
+def stat_roulette(p_name,e_name,p_stat,e_stat,stat_type,fight_difficulty):
     fight_difficulty=fight_difficulty*random.randint(1,50)
     stat_bonus=fight_difficulty//100
     stats_roulette_result=random.randint(0,99)
@@ -253,16 +269,23 @@ def stat_roulette(stat,stat_type,fight_difficulty):
     if fight_difficulty%100>stats_roulette_result:
         stat_bonus+=1
 
+    stat_absorption=(e_stat*0.0042)
+
+    print(str(stat_absorption)+" "+stat_type+" has been absorbed from the "+e_name)
+
     if stat_bonus>0:
-        print (stat_type+" has increased: "+str(stat)+" --> "+str(stat+stat_bonus ))
+        print ("Event: "+str(p_name)+"has randomnly enlightened themselves on how to increase their "+stat_type+" by "+str(stat_bonus))
+
     elif stat_bonus==0:
-        print(stat_type+" is still "+str(stat))
+        print("\n")
     else:
         print("Error STATROULETTE: If you see this, please tell me the error code and anything you did to cause this")
         stat_bonus=0
+
+    print(stat_type+": "+str(p_stat)+" --> "+str(p_stat + stat_bonus + stat_absorption))
     
-    stat=stat+stat_bonus 
-    return stat
+    p_stat=p_stat + stat_bonus + stat_absorption
+    return p_stat
 
 #END OF stat_roulette()
 
@@ -302,10 +325,9 @@ new_game=save_manager_on_load()#Runs save_manager_on_load
 
 p_name, p_hp, p_atk, p_def =pull_stats_from_save()#Runs pull_stats_from_save
 
-p_hp=int(p_hp)
-p_atk=int(p_atk)
-p_def=int(p_def)
-
+p_hp=float(p_hp)
+p_atk=float(p_atk)
+p_def=float(p_def)
 
 
 if new_game == True: #This is true when a save file didn't exist at startup, so a new game is started and we make a tutorial or beginning
